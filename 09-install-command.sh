@@ -12,7 +12,7 @@ else {
 }
 fi
 
-dnf installed nginx 
+dnf list installed nginx 
 if [ $? -ne 0 ]
 
 then {
