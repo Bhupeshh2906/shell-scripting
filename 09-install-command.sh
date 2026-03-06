@@ -19,7 +19,6 @@ then {
    echo " nginx is not installed. Now going to install."
 
    dnf install nginx -y
-
    if [ $? -eq 0]
 
    then {
