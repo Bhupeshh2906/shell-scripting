@@ -21,8 +21,32 @@ INSTANCE_ID=$(aws ec2 run-instances \
     then
         IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PrivateIpAddress' --output text) 
         echo " instance $instance IP address is $IP."
+        Record_name='$instance.$DOMAIN_NAME'
     else
         IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PublicIpAddress' --output text)
-        echo " $instance ip address is $IP."   
+        echo " $instance ip address is $IP."
+        Record_name='$DOMAIN_NAME'   
     fi
+
+    aws route53 change-resource-record-sets \
+  --hosted-zone-id $ZONE_ID \
+  --change-batch '{
+    "Comment": "Update record to reflect new IP address",
+    "Changes": [
+      {
+        "Action": "UPSERT",
+        "ResourceRecordSet": {
+          "Name": "'$Record_name'",
+          "Type": "A",
+          "TTL": 1,
+          "ResourceRecords": [
+            {
+              "Value": "$IP"
+            }
+          ]
+        }
+      }
+    ]
+  }'
 done
+
